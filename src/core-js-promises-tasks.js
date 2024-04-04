@@ -155,8 +155,28 @@ function getAllOrNothing(promises) {
  * [Promise.resolve(1), Promise.resolve(2), Promise.resolve(3)] => Promise fulfilled with [1, 2, 3]
  * [Promise.resolve(1), Promise.reject(2), Promise.resolve(3)]  => Promise fulfilled with [1, null, 3]
  */
-function getAllResult(/* promises */) {
-  throw new Error('Not implemented');
+function getAllResult(promises) {
+  return new Promise((resolve) => {
+    const resolvedValues = new Array(promises.length).fill(null);
+    let rejected = false;
+    promises.forEach((promise, index) => {
+      promise
+        .then((value) => {
+          if (!rejected) {
+            resolvedValues[index] = value;
+            if (resolvedValues.every((val) => val !== null)) {
+              resolve(resolvedValues);
+            }
+          }
+        })
+        .catch(() => {
+          if (!rejected) {
+            rejected = true;
+            resolve(resolvedValues);
+          }
+        });
+    });
+  });
 }
 
 /**
